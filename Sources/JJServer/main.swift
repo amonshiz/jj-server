@@ -1,6 +1,18 @@
 import Foundation
 import MCP
 import JJServerCore
+import Logging
+import LoggingOSLog
+
+// Get the JJ command path from command-line arguments
+guard CommandLine.arguments.count >= 2 else {
+    print("Error: JJ command path is required as the first argument")
+    exit(1)
+}
+let jjCommandPath = CommandLine.arguments[1]
+
+// Set the JJ command path in JJCommands
+await JJCommands.setJJCommandPath(jjCommandPath)
 
 // Initialize the server with tool capabilities
 let server = Server(
@@ -13,7 +25,11 @@ let server = Server(
     )
 )
 
-let transport = StdioTransport()
+LoggingSystem.bootstrap(LoggingOSLog.init)
+let logger = Logger(label: "com.loopwork.iMCP.server")
+logger.debug("Starting server")
+
+let transport = StdioTransport(logger: logger)
 
 // Register tool handlers
 await server.withMethodHandler(ListTools.self) { _ in
@@ -30,9 +46,12 @@ await server.withMethodHandler(ListTools.self) { _ in
             name: "jj-commit",
             description: "Creates a new commit with the current changes and a message",
             inputSchema: .object([
-                "type": "object",
+                "type": .string("object"),
                 "properties": .object([
-                    "message": .string("The commit message")
+                    "message": .object([
+                        "type": .string("string"),
+                        "description": .string("The commit message")
+                    ])
                 ])
             ])
         ),
@@ -50,7 +69,10 @@ await server.withMethodHandler(ListTools.self) { _ in
             inputSchema: .object([
                 "type": "object",
                 "properties": .object([
-                    "commit": .string("The commit ID to edit")
+                    "commit": .object([
+                        "type": .string("string"),
+                        "description": .string("The commit ID to edit")
+                    ])
                 ])
             ])
         )
