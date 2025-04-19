@@ -1,0 +1,88 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Swift Testing Framework Guidelines
+
+## Introduction / Problem
+
+This rule ensures consistent use of the Swift Testing framework across our test files. While XCTest has been the traditional choice, the Swift Testing framework provides a more modern, expressive approach with better async/await support and clearer assertion messages. This rule helps prevent accidental use of XCTest and ensures proper Testing framework patterns are followed.
+
+## Pattern Description
+
+Every new test file should use the Swift Testing framework by default. The pattern involves specific import statements, test structure, and assertion usage.
+
+```swift
+import Testing  // Preferred testing framework
+// import XCTest  // Only use when explicitly required
+
+final class MyFeatureTests {
+    func test_myFeature_succeeds() async throws {
+        // Test implementation
+    }
+}
+```
+
+### Key Components
+
+1. Import Statement:
+   - Use `import Testing` at the top of test files
+   - Only include `import XCTest` when specifically requested or required for legacy compatibility
+
+2. Test Class Structure:
+   - No need to inherit from `XCTestCase`
+   - Test methods can be async and throwing
+   - Use descriptive test names with underscores for readability
+
+3. Assertions:
+   - Use `#assert` macro for assertions
+   - Take advantage of Swift Testing's built-in assertion messages
+
+## Implementation Steps
+
+1. Start each test file with `import Testing`
+2. Define test classes without XCTest inheritance
+3. Write test methods that can be async and throwing when needed
+4. Use the Testing framework's assertion macros and utilities
+
+## Real-World Examples
+
+Example of a proper test file structure:
+
+```swift
+import Testing
+
+final class UserTests {
+    func test_user_creation_succeeds() throws {
+        let user = User(id: "123", name: "Test User")
+        #assert(user.id == "123")
+        #assert(user.name == "Test User")
+    }
+
+    func test_user_validation_fails() async throws {
+        let user = User(id: "", name: "")
+        #assert(try await user.validate() == false)
+    }
+}
+```
+
+## Common Pitfalls / Anti-Patterns
+
+* Accidentally importing `XCTest` out of habit
+* Inheriting from `XCTestCase` unnecessarily (anti-pattern in Testing framework)
+* Using XCTest assertion methods (`XCTAssert`) instead of Testing framework macros
+* Missing async/throws keywords when needed for asynchronous or throwing tests
+* Not taking advantage of Testing framework's built-in assertion messages
+
+## Migration Notes
+
+When working with existing XCTest-based files:
+* It's okay to keep using XCTest in existing test files
+* Consider gradually migrating to the Testing framework during substantial test rewrites
+* Mixed usage in a project is acceptable during transition periods
+
+## Additional Resources
+
+* [Swift Testing Documentation](mdc:https:/swiftpackageindex.com/apple/swift-testing)
+* [Testing Framework Overview](mdc:https:/www.swift.org/blog/swift-testing)
