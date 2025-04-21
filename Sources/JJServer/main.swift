@@ -39,7 +39,13 @@ await server.withMethodHandler(ListTools.self) { _ in
             description: "Lists all current changes in the working directory",
             inputSchema: .object([
                 "type": "object",
-                "properties": .object([:])
+                "properties": .object([
+                    "repo-path": .object([
+                        "type": .string("string"),
+                        "description": .string("Absolute path to the repository on disk")
+                    ])
+                ]),
+                "required": .array([.string("repo-path")])
             ])
         ),
         Tool(
@@ -51,8 +57,13 @@ await server.withMethodHandler(ListTools.self) { _ in
                     "message": .object([
                         "type": .string("string"),
                         "description": .string("The commit message")
+                    ]),
+                    "repo-path": .object([
+                        "type": .string("string"),
+                        "description": .string("Absolute path to the repository on disk")
                     ])
-                ])
+                ]),
+                "required": .array([.string("message"), .string("repo-path")])
             ])
         ),
         Tool(
@@ -60,7 +71,13 @@ await server.withMethodHandler(ListTools.self) { _ in
             description: "Create a new, empty change and (by default) edit it in the working copy",
             inputSchema: .object([
                 "type": "object",
-                "properties": .object([:])
+                "properties": .object([
+                    "repo-path": .object([
+                        "type": .string("string"),
+                        "description": .string("Absolute path to the repository on disk")
+                    ])
+                ]),
+                "required": .array([.string("repo-path")])
             ])
         ),
         Tool(
@@ -72,31 +89,39 @@ await server.withMethodHandler(ListTools.self) { _ in
                     "commit": .object([
                         "type": .string("string"),
                         "description": .string("The commit ID to edit")
+                    ]),
+                    "repo-path": .object([
+                        "type": .string("string"),
+                        "description": .string("Absolute path to the repository on disk")
                     ])
-                ])
+                ]),
+                "required": .array([.string("commit"), .string("repo-path")])
             ])
         )
     ])
 }
 
 await server.withMethodHandler(CallTool.self) { params in
+    guard let repoPath = params.arguments?["repo-path"]?.stringValue, !repoPath.isEmpty else {
+        throw MCPError.invalidParams("Missing required parameter: repo-path")
+    }
     let result: [Tool.Content]
 
     switch params.name {
     case "jj-list-changes":
-        result = try await JJCommands.listChanges()
+        result = try await JJCommands.listChanges(repoPath: repoPath)
     case "jj-commit":
         guard let message = params.arguments?["message"]?.stringValue else {
             throw MCPError.invalidParams("Missing required parameter: message")
         }
-        result = try await JJCommands.commit(message: message)
+        result = try await JJCommands.commit(message: message, repoPath: repoPath)
     case "jj-new":
-        result = try await JJCommands.newCommit()
+        result = try await JJCommands.newCommit(repoPath: repoPath)
     case "jj-edit":
         guard let commit = params.arguments?["commit"]?.stringValue else {
             throw MCPError.invalidParams("Missing required parameter: commit")
         }
-        result = try await JJCommands.edit(commit: commit)
+        result = try await JJCommands.edit(commit: commit, repoPath: repoPath)
     default:
         throw MCPError.methodNotFound("Unknown tool: \(params.name)")
     }
