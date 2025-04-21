@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-jj-mcp}",
+            "name": "Debug JJServer",
+            "program": "${workspaceFolder:swift-jj-mcp}/.build/debug/JJServer",
+            "preLaunchTask": "swift: Build Debug JJServer"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-jj-mcp}",
+            "name": "Release JJServer",
+            "program": "${workspaceFolder:swift-jj-mcp}/.build/release/JJServer",
+            "preLaunchTask": "swift: Build Release JJServer"
+        }
+    ]
+}
