@@ -56,8 +56,8 @@ await server.withMethodHandler(ListTools.self) { _ in
             ])
         ),
         Tool(
-            name: "jj-commit-empty",
-            description: "Creates a new commit without a message",
+            name: "jj-new",
+            description: "Create a new, empty change and (by default) edit it in the working copy",
             inputSchema: .object([
                 "type": "object",
                 "properties": .object([:])
@@ -90,8 +90,8 @@ await server.withMethodHandler(CallTool.self) { params in
             throw MCPError.invalidParams("Missing required parameter: message")
         }
         result = try await JJCommands.commit(message: message)
-    case "jj-commit-empty":
-        result = try await JJCommands.commitEmpty()
+    case "jj-new":
+        result = try await JJCommands.newCommit()
     case "jj-edit":
         guard let commit = params.arguments?["commit"]?.stringValue else {
             throw MCPError.invalidParams("Missing required parameter: commit")

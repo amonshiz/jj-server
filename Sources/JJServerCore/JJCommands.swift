@@ -18,8 +18,8 @@ private actor JJCommandPathManager {
     }
 }
 
-public struct JJCommands {
-    private static let logger = Logger(label: "com.loopwork.iMCP.jjcommands")
+public enum JJCommands {
+    private static let logger = Logger(label: "JJCommands")
 
     public static func setJJCommandPath(_ path: String) async {
         logger.info("Setting JJ command path", metadata: ["path": .string(path)])
@@ -70,11 +70,11 @@ public struct JJCommands {
         return [.text(output)]
     }
 
-    public static func commitEmpty() async throws -> [Tool.Content] {
-        logger.info("Executing jj commit --empty command")
+    public static func newCommit() async throws -> [Tool.Content] {
+        logger.info("Executing jj new command")
         let process = Process()
         process.executableURL = URL(fileURLWithPath: try await getJJCommandPath())
-        process.arguments = ["commit", "--empty"]
+        process.arguments = ["new"]
 
         let pipe = Pipe()
         process.standardOutput = pipe
@@ -86,7 +86,7 @@ public struct JJCommands {
         let data = try pipe.fileHandleForReading.readToEnd() ?? Data()
         let output = String(data: data, encoding: .utf8) ?? ""
 
-        logger.debug("jj commit --empty command completed", metadata: ["exitCode": .string("\(process.terminationStatus)")])
+        logger.debug("jj new command completed", metadata: ["exitCode": .string("\(process.terminationStatus)")])
         return [.text(output)]
     }
 
