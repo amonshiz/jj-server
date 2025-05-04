@@ -30,11 +30,12 @@ public enum JJCommands {
         try await JJCommandPathManager.shared.getPath()
     }
 
-    public static func listChanges() async throws -> [Tool.Content] {
+    public static func listChanges(repoPath: String) async throws -> [Tool.Content] {
         logger.info("Executing jj status command")
         let process = Process()
         process.executableURL = URL(fileURLWithPath: try await getJJCommandPath())
-        process.arguments = ["status"]
+        let args = ["--repository", repoPath, "status"]
+        process.arguments = args
 
         let pipe = Pipe()
         process.standardOutput = pipe
@@ -50,11 +51,12 @@ public enum JJCommands {
         return [.text(output)]
     }
 
-    public static func commit(message: String) async throws -> [Tool.Content] {
+    public static func commit(message: String, repoPath: String) async throws -> [Tool.Content] {
         logger.info("Executing jj commit command", metadata: ["message": .string(message)])
         let process = Process()
         process.executableURL = URL(fileURLWithPath: try await getJJCommandPath())
-        process.arguments = ["commit", "-m", message]
+        let args = ["--repository", repoPath, "commit", "-m", message]
+        process.arguments = args
 
         let pipe = Pipe()
         process.standardOutput = pipe
@@ -70,11 +72,12 @@ public enum JJCommands {
         return [.text(output)]
     }
 
-    public static func newCommit() async throws -> [Tool.Content] {
+    public static func newCommit(repoPath: String) async throws -> [Tool.Content] {
         logger.info("Executing jj new command")
         let process = Process()
         process.executableURL = URL(fileURLWithPath: try await getJJCommandPath())
-        process.arguments = ["new"]
+        let args = ["--repository", repoPath, "new"]
+        process.arguments = args
 
         let pipe = Pipe()
         process.standardOutput = pipe
@@ -90,11 +93,12 @@ public enum JJCommands {
         return [.text(output)]
     }
 
-    public static func edit(commit: String) async throws -> [Tool.Content] {
+    public static func edit(commit: String, repoPath: String) async throws -> [Tool.Content] {
         logger.info("Executing jj edit command", metadata: ["commit": .string(commit)])
         let process = Process()
         process.executableURL = URL(fileURLWithPath: try await getJJCommandPath())
-        process.arguments = ["edit", commit]
+        let args = ["--repository", repoPath, "edit", commit]
+        process.arguments = args
 
         let pipe = Pipe()
         process.standardOutput = pipe
